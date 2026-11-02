@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRF Usher Assistant</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f4f6f9;
+            --accent-color: #d9534f;
+            --text-color: #333;
+            --border-color: #ccc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.danger {
+            background-color: var(--accent-color);
+        }
+
+        button.secondary {
+            background-color: #6c757d;
+        }
+
+        .chat-box {
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 4px;
+            background: #fafafa;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+        }
+
+        .message.user {
+            background-color: #e3f2fd;
+            text-align: right;
+        }
+
+        .message.assistant {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .pdf-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        /* Modal Authentication overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- Direct Authentication Modal (TR-03, TR-04, URS-025) -->
+<div id="authModal" class="modal-overlay">
+    <div class="modal">
+        <h2>SRF Usher Assistant</h2>
+        <p>Please authenticate to access operational procedures.</p>
+        <div class="form-group">
+            <label for="authUser">Authorized Email</label>
+            <input type="text" id="authUser" placeholder="usher@srf-encinitas.org">
+        </div>
+        <button id="loginBtn" style="width: 100%;">Sign In</button>
+    </div>
+</div>
+
+<header>
+    <h1>SRF Usher Assistant</h1>
+    <small>Encinitas Temple & J Street Chapel</small>
+</header>
+
+<div class="container">
+    <!-- Context / Location / Role Controls (URS-002, URS-003, URS-004, TR-16) -->
+    <div class="card">
+        <h3>Context Controls</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div class="form-group">
+                <label for="locationSelect">Location</label>
+                <select id="locationSelect">
+                    <option value="">-- Unselected --</option>
+                    <option value="temple">Encinitas Temple</option>
+                    <option value="chapel">J Street Chapel</option>
+                </select>
+            </div>
+            <div class="form-group" id="serviceGroup">
+                <label for="serviceSelect">Service</label>
+                <select id="serviceSelect">
+                    <option value="1st">1st Service</option>
+                    <option value="2nd" id="secondServiceOpt">2nd Service</option>
+                </select>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="secondary" id="clearContextBtn">Clear Context</button>
+            <button class="danger" id="emergencyBtn">Emergency Info</button>
+        </div>
+    </div>
+
+    <!-- Quick Role Selection Shortcuts (URS-005, URS-006) -->
+    <div class="card">
+        <h3>Roles & Site Plan Positions</h3>
+        <div class="btn-group">
+            <button onclick="setRole('Head Usher')">Head Usher</button>
+            <button onclick="setRole('Seating Usher')">Seating Usher</button>
+            <button onclick="setRole('Foyer Usher')">Foyer Usher</button>
+            <button onclick="setRole('Patio Usher')">Patio Usher</button>
+        </div>
+    </div>
+
+    <!-- Query Interface (URS-001, URS-007, URS-014, URS-015) -->
+    <div class="card">
+        <h3>Ask Procedure Question</h3>
+        <div class="chat-box" id="chatBox">
+            <div class="message assistant">
+                Welcome. Select a location/role or type your question below. Answers are strictly grounded in approved published procedures.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="text" id="userInput" placeholder="Type or dictate your question...">
+        </div>
+
+        <div class="btn-group">
+            <button id="sendBtn">Ask Assistant</button>
+            <button id="voiceBtn" class="secondary">🎤 Voice</button>
+            <button id="stopSpeechBtn" class="danger hidden">Stop Speaking</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // System State
+    let activeRole = '';
+    const synth = window.speechSynthesis;
+
+    // Direct Login Simulation (TR-03, TR-04, URS-025)
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        const email = document.getElementById('authUser').value;
+        if(email.trim() !== '') {
+            document.getElementById('authModal').classList.add('hidden');
+        } else {
+            alert('Please enter a valid authorized email.');
+        }
+    });
+
+    // Location & Service Logic (URS-002, URS-003, URS-004, TR-16)
+    const locationSelect = document.getElementById('locationSelect');
+    const serviceSelect = document.getElementById('serviceSelect');
+    const secondServiceOpt = document.getElementById('secondServiceOpt');
+
+    locationSelect.addEventListener('change', () => {
+        if (locationSelect.value === 'chapel') {
+            secondServiceOpt.disabled = true;
+            secondServiceOpt.classList.add('hidden');
+            serviceSelect.value = '1st'; // Reset to 1st service for Chapel
+        } else {
+            secondServiceOpt.disabled = false;
+            secondServiceOpt.classList.remove('hidden');
+        }
+    });
+
+    document.getElementById('clearContextBtn').addEventListener('click', () => {
+        locationSelect.value = '';
+        secondServiceOpt.disabled = false;
+        secondServiceOpt.classList.remove('hidden');
+        serviceSelect.value = '1st';
+        activeRole = '';
+        addMessage('assistant', 'Context cleared. Location is now unselected.');
+    });
+
+    // Emergency Quick Access (URS-013)
+    document.getElementById('emergencyBtn').addEventListener('click', () => {
+        const emergencyMsg = "EMERGENCY PROCEDURES:\n1. For medical/fire emergencies, immediately call 911.\n2. Contact Head Usher on duty.\n3. Refer to the Emergency Reference PDF for facility-specific evacuation maps.";
+        addMessage('assistant', emergencyMsg, 'https://srf-volunteer.org/docs/emergency-reference.pdf');
+    });
+
+    function setRole(roleName) {
+        activeRole = roleName;
+        addMessage('assistant', `Selected Role: ${roleName}. You can now ask specific procedure questions for this role.`);
+    }
+
+    // Question Answering & Grounding Rules (URS-007, URS-017, URS-020, SEC-001)
+    document.getElementById('sendBtn').addEventListener('click', processQuery);
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') processQuery();
+    });
+
+    function processQuery() {
+        const queryInput = document.getElementById('userInput');
+        const query = queryInput.value.trim();
+        if (!query) return;
+
+        addMessage('user', query);
+        queryInput.value = '';
+
+        const lowerQuery = query.toLowerCase();
+
+        // 1. Roster Data Protection Boundary (URS-017, SEC-001, TR-10)
+        if (lowerQuery.includes('phone') || lowerQuery.includes('roster') || lowerQuery.includes('email') || lowerQuery.includes('contact details')) {
+            addMessage('assistant', "Volunteer roster details, personal contact information, and emails are strictly restricted and not accessible through this assistant.");
+            return;
+        }
+
+        // 2. Procedural Fallback Engine (URS-007, URS-020, TR-09)
+        const loc = locationSelect.value ? locationSelect.options[locationSelect.selectedIndex].text : 'Unselected';
+        
+        if (lowerQuery.includes('seating') || activeRole === 'Seating Usher') {
+            addMessage('assistant', `[${loc}] For seating, direct congregants from front to back. Keep aisleways clear at all times during service.`, 'https://srf-volunteer.org/docs/seating-procedure.pdf');
+        } else if (lowerQuery.includes('foyer') || activeRole === 'Foyer Usher') {
+            addMessage('assistant', `[${loc}] Foyer ushers should assist late arrivals and ensure quiet during meditation periods.`, 'https://srf-volunteer.org/docs/foyer-procedure.pdf');
+        } else {
+            // Safe Failure / Escalation (URS-020)
+            addMessage('assistant', "I do not have a reliable answer grounded in the approved procedure set for this query. Please consult the Head Usher or User Procedures Coordinator.");
+        }
+    }
+
+    function addMessage(sender, text, pdfUrl = null) {
+        const chatBox = document.getElementById('chatBox');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        msgDiv.innerText = text;
+
+        if (pdfUrl) {
+            const pdfAnchor = document.createElement('a');
+            pdfAnchor.className = 'pdf-link';
+            pdfAnchor.href = pdfUrl;
+            pdfAnchor.target = '_blank';
+            pdfAnchor.innerText = 'View Official Approved PDF';
+            msgDiv.appendChild(document.createElement('br'));
+            msgDiv.appendChild(pdfAnchor);
+        }
+
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        if (sender === 'assistant') {
+            speakText(text);
+        }
+    }
+
+    // Voice Input & Synthesis Logic (URS-014, URS-015, FS-VOC-001, FS-VOC-003)
+    const voiceBtn = document.getElementById('voiceBtn');
+    const stopSpeechBtn = document.getElementById('stopSpeechBtn');
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        voiceBtn.addEventListener('click', () => {
+            recognition.start();
+            voiceBtn.innerText = 'Listening...';
+        });
+
+        recognition.onresult = (event) => {
+            document.getElementById('userInput').value = event.results[0][0].transcript;
+            voiceBtn.innerText = '🎤 Voice';
+            processQuery();
+        };
+
+        recognition.onerror = () => { voiceBtn.innerText = '🎤 Voice'; };
+        recognition.onend = () => { voiceBtn.innerText = '🎤 Voice'; };
+    } else {
+        voiceBtn.disabled = true;
+    }
+
+    function speakText(text) {
+        if (!synth) return;
+        synth.cancel(); // Stop active speech
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        stopSpeechBtn.classList.remove('hidden');
+
+        utterance.onend = () => stopSpeechBtn.classList.add('hidden');
+        utterance.onerror = () => stopSpeechBtn.classList.add('hidden');
+
+        synth.speak(utterance);
+    }
+
+    stopSpeechBtn.addEventListener('click', () => {
+        if (synth) {
+            synth.cancel();
+            stopSpeechBtn.classList.add('hidden');
+        }
+    });
+</script>
+</body>
+</html>
