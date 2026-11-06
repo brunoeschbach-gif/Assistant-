@@ -1,384 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRF Usher Assistant</title>
-    <style>
-        :root {
-            --primary-color: #0056b3;
-            --secondary-color: #f4f6f9;
-            --accent-color: #d9534f;
-            --text-color: #333;
-            --border-color: #ccc;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SRF Usher Assistant</title>
+  <style>
+    :root {
+      --bg-dark: #0e0f12;
+      --card-bg: rgba(24, 26, 32, 0.85);
+      --card-border: #2a2d35;
+      --accent-red: #e82127;
+      --accent-red-hover: #c0191e;
+      --text-main: #f0f2f5;
+      --text-muted: #8e94a0;
+      --input-bg: #14161d;
+      --badge-bg: #1e222d;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
+    .app-container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .form-group {
-            margin-bottom: 0.75rem;
-        }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
 
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 0.25rem;
-        }
+    header span {
+      font-size: 0.8rem;
+      color: var(--accent-red);
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
 
-        select, input[type="text"], textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
 
-        .btn-group {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-        }
+    .card-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
 
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
 
-        button:hover {
-            opacity: 0.9;
-        }
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
 
-        button.danger {
-            background-color: var(--accent-color);
-        }
+    label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+    }
 
-        button.secondary {
-            background-color: #6c757d;
-        }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
 
-        .chat-box {
-            min-height: 150px;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            padding: 0.75rem;
-            border-radius: 4px;
-            background: #fafafa;
-            margin-bottom: 1rem;
-        }
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent-red);
+    }
 
-        .message {
-            margin-bottom: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
-        }
+    .btn {
+      background: var(--accent-red);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
 
-        .message.user {
-            background-color: #e3f2fd;
-            text-align: right;
-        }
+    .btn:hover {
+      background: var(--accent-red-hover);
+    }
 
-        .message.assistant {
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-        }
+    .btn:active {
+      transform: scale(0.98);
+    }
 
-        .pdf-link {
-            display: inline-block;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
+    .btn-secondary {
+      background: var(--badge-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
 
-        /* Modal Authentication overlay */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
+    .btn-secondary:hover {
+      background: #282c3b;
+    }
 
-        .modal {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 400px;
-        }
+    .map-container {
+      position: relative;
+      background: var(--input-bg);
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid var(--card-border);
+      text-align: center;
+    }
 
-        .hidden { display: none !important; }
-    </style>
+    .map-svg {
+      width: 100%;
+      max-height: 220px;
+    }
+
+    .map-node {
+      cursor: pointer;
+      transition: fill 0.2s;
+    }
+
+    .map-node:hover {
+      fill: var(--accent-red);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .response-area {
+      min-height: 80px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #e1e4ea;
+    }
+
+    .audio-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .pdf-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--accent-red);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .pdf-link:hover {
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Direct Authentication Modal (TR-03, TR-04, URS-025) -->
-<div id="authModal" class="modal-overlay">
-    <div class="modal">
-        <h2>SRF Usher Assistant</h2>
-        <p>Please authenticate to access operational procedures.</p>
-        <div class="form-group">
-            <label for="authUser">Authorized Email</label>
-            <input type="text" id="authUser" placeholder="usher@srf-encinitas.org">
-        </div>
-        <button id="loginBtn" style="width: 100%;">Sign In</button>
-    </div>
-</div>
+  <div class="app-container">
+    <header>
+      <h1>SRF Usher Assistant</h1>
+      <span>TESLA DARK v1.0</span>
+    </header>
 
-<header>
-    <h1>SRF Usher Assistant</h1>
-    <small>Encinitas Temple & J Street Chapel</small>
-</header>
-
-<div class="container">
-    <!-- Context / Location / Role Controls (URS-002, URS-003, URS-004, TR-16) -->
+    <!-- Context Selector Card -->
     <div class="card">
-        <h3>Context Controls</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-            <div class="form-group">
-                <label for="locationSelect">Location</label>
-                <select id="locationSelect">
-                    <option value="">-- Unselected --</option>
-                    <option value="temple">Encinitas Temple</option>
-                    <option value="chapel">J Street Chapel</option>
-                </select>
-            </div>
-            <div class="form-group" id="serviceGroup">
-                <label for="serviceSelect">Service</label>
-                <select id="serviceSelect">
-                    <option value="1st">1st Service</option>
-                    <option value="2nd" id="secondServiceOpt">2nd Service</option>
-                </select>
-            </div>
+      <div class="card-title">Context & Filter Controls</div>
+      <div class="grid-2">
+        <div>
+          <label for="locationSelect">Location Context</label>
+          <select id="locationSelect" onchange="handleLocationChange()">
+            <option value="">Unselected (All Locations)</option>
+            <option value="encinitas">Encinitas Temple</option>
+            <option value="jstreet">J Street Chapel</option>
+          </select>
         </div>
-        <div class="btn-group">
-            <button class="secondary" id="clearContextBtn">Clear Context</button>
-            <button class="danger" id="emergencyBtn">Emergency Info</button>
+        <div>
+          <label for="serviceSelect">Service Session</label>
+          <select id="serviceSelect">
+            <option value="">All Services</option>
+            <option value="1st">1st Service (9:30 AM)</option>
+            <option id="service2ndOpt" value="2nd">2nd Service (11:00 AM)</option>
+          </select>
         </div>
+      </div>
+      <div style="margin-top: 12px; text-align: right;">
+        <button class="btn btn-secondary" onclick="resetContext()" style="padding: 6px 12px; font-size: 0.8rem;">Clear Context</button>
+      </div>
     </div>
 
-    <!-- Quick Role Selection Shortcuts (URS-005, URS-006) -->
+    <!-- Interactive Site Plan Card -->
     <div class="card">
-        <h3>Roles & Site Plan Positions</h3>
-        <div class="btn-group">
-            <button onclick="setRole('Head Usher')">Head Usher</button>
-            <button onclick="setRole('Seating Usher')">Seating Usher</button>
-            <button onclick="setRole('Foyer Usher')">Foyer Usher</button>
-            <button onclick="setRole('Patio Usher')">Patio Usher</button>
-        </div>
+      <div class="card-title">Interactive Site Plan & Role Mapping</div>
+      <div class="map-container">
+        <svg class="map-svg" viewBox="0 0 500 200">
+          <rect x="10" y="10" width="480" height="180" rx="10" fill="#181a20" stroke="#2a2d35" stroke-width="2"/>
+          <!-- Main Sanctuary -->
+          <rect x="140" y="30" width="220" height="100" rx="6" fill="#14161d" stroke="#2a2d35"/>
+          <text x="250" y="85" fill="#8e94a0" font-size="14" text-anchor="middle">Main Sanctuary</text>
+          
+          <!-- Interactive Role Nodes -->
+          <g class="map-node" onclick="selectRole('Head Usher')">
+            <circle cx="250" cy="155" r="14" fill="#e82127"/>
+            <text x="250" y="159" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">HU</text>
+          </g>
+          <g class="map-node" onclick="selectRole('Seating Usher')">
+            <circle cx="180" cy="80" r="14" fill="#282c3b" stroke="#e82127"/>
+            <text x="180" y="84" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">SU</text>
+          </g>
+          <g class="map-node" onclick="selectRole('Foyer Usher')">
+            <circle cx="320" cy="80" r="14" fill="#282c3b" stroke="#e82127"/>
+            <text x="320" y="84" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">FU</text>
+          </g>
+          <g class="map-node" onclick="selectRole('Patio Usher')">
+            <circle cx="60" cy="100" r="14" fill="#282c3b" stroke="#e82127"/>
+            <text x="60" y="104" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">PU</text>
+          </g>
+        </svg>
+      </div>
     </div>
 
-    <!-- Query Interface (URS-001, URS-007, URS-014, URS-015) -->
+    <!-- Search & Guidance Card -->
     <div class="card">
-        <h3>Ask Procedure Question</h3>
-        <div class="chat-box" id="chatBox">
-            <div class="message assistant">
-                Welcome. Select a location/role or type your question below. Answers are strictly grounded in approved published procedures.
-            </div>
-        </div>
+      <div class="card-title">Procedure Assistant & Direct Search</div>
+      <div class="search-box">
+        <input type="text" id="queryInput" placeholder="Ask a procedure question or search..." onkeypress="handleKeyPress(event)">
+        <button class="btn" onclick="executeQuery()">Ask</button>
+      </div>
 
-        <div class="form-group">
-            <input type="text" id="userInput" placeholder="Type or dictate your question...">
+      <div style="margin-top: 16px;">
+        <div id="responseBox" class="response-area">Select a location, click a role on the map, or enter a question to view operational procedures.</div>
+        <div id="pdfLinkContainer" class="hidden">
+          <a id="pdfLink" href="#" target="_blank" class="pdf-link">📄 View Approved Procedure PDF (Rev 1.0)</a>
         </div>
+      </div>
 
-        <div class="btn-group">
-            <button id="sendBtn">Ask Assistant</button>
-            <button id="voiceBtn" class="secondary">🎤 Voice</button>
-            <button id="stopSpeechBtn" class="danger hidden">Stop Speaking</button>
-        </div>
+      <div class="audio-controls">
+        <button id="voiceBtn" class="btn btn-secondary" onclick="toggleVoiceInput()">🎤 Speak</button>
+        <button id="stopAudioBtn" class="btn btn-secondary hidden" onclick="stopSpeech()">⏹ Stop Speaking</button>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-    // System State
-    let activeRole = '';
-    const synth = window.speechSynthesis;
+  <script>
+    let synth = window.speechSynthesis;
 
-    // Direct Login Simulation (TR-03, TR-04, URS-025)
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const email = document.getElementById('authUser').value;
-        if(email.trim() !== '') {
-            document.getElementById('authModal').classList.add('hidden');
-        } else {
-            alert('Please enter a valid authorized email.');
+    function handleLocationChange() {
+      const loc = document.getElementById('locationSelect').value;
+      const opt2nd = document.getElementById('service2ndOpt');
+      const serviceSel = document.getElementById('serviceSelect');
+      
+      if (loc === 'jstreet') {
+        opt2nd.classList.add('hidden');
+        if (serviceSel.value === '2nd') {
+          serviceSel.value = '';
         }
-    });
-
-    // Location & Service Logic (URS-002, URS-003, URS-004, TR-16)
-    const locationSelect = document.getElementById('locationSelect');
-    const serviceSelect = document.getElementById('serviceSelect');
-    const secondServiceOpt = document.getElementById('secondServiceOpt');
-
-    locationSelect.addEventListener('change', () => {
-        if (locationSelect.value === 'chapel') {
-            secondServiceOpt.disabled = true;
-            secondServiceOpt.classList.add('hidden');
-            serviceSelect.value = '1st'; // Reset to 1st service for Chapel
-        } else {
-            secondServiceOpt.disabled = false;
-            secondServiceOpt.classList.remove('hidden');
-        }
-    });
-
-    document.getElementById('clearContextBtn').addEventListener('click', () => {
-        locationSelect.value = '';
-        secondServiceOpt.disabled = false;
-        secondServiceOpt.classList.remove('hidden');
-        serviceSelect.value = '1st';
-        activeRole = '';
-        addMessage('assistant', 'Context cleared. Location is now unselected.');
-    });
-
-    // Emergency Quick Access (URS-013)
-    document.getElementById('emergencyBtn').addEventListener('click', () => {
-        const emergencyMsg = "EMERGENCY PROCEDURES:\n1. For medical/fire emergencies, immediately call 911.\n2. Contact Head Usher on duty.\n3. Refer to the Emergency Reference PDF for facility-specific evacuation maps.";
-        addMessage('assistant', emergencyMsg, 'https://srf-volunteer.org/docs/emergency-reference.pdf');
-    });
-
-    function setRole(roleName) {
-        activeRole = roleName;
-        addMessage('assistant', `Selected Role: ${roleName}. You can now ask specific procedure questions for this role.`);
+      } else {
+        opt2nd.classList.remove('hidden');
+      }
     }
 
-    // Question Answering & Grounding Rules (URS-007, URS-017, URS-020, SEC-001)
-    document.getElementById('sendBtn').addEventListener('click', processQuery);
-    document.getElementById('userInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') processQuery();
-    });
-
-    function processQuery() {
-        const queryInput = document.getElementById('userInput');
-        const query = queryInput.value.trim();
-        if (!query) return;
-
-        addMessage('user', query);
-        queryInput.value = '';
-
-        const lowerQuery = query.toLowerCase();
-
-        // 1. Roster Data Protection Boundary (URS-017, SEC-001, TR-10)
-        if (lowerQuery.includes('phone') || lowerQuery.includes('roster') || lowerQuery.includes('email') || lowerQuery.includes('contact details')) {
-            addMessage('assistant', "Volunteer roster details, personal contact information, and emails are strictly restricted and not accessible through this assistant.");
-            return;
-        }
-
-        // 2. Procedural Fallback Engine (URS-007, URS-020, TR-09)
-        const loc = locationSelect.value ? locationSelect.options[locationSelect.selectedIndex].text : 'Unselected';
-        
-        if (lowerQuery.includes('seating') || activeRole === 'Seating Usher') {
-            addMessage('assistant', `[${loc}] For seating, direct congregants from front to back. Keep aisleways clear at all times during service.`, 'https://srf-volunteer.org/docs/seating-procedure.pdf');
-        } else if (lowerQuery.includes('foyer') || activeRole === 'Foyer Usher') {
-            addMessage('assistant', `[${loc}] Foyer ushers should assist late arrivals and ensure quiet during meditation periods.`, 'https://srf-volunteer.org/docs/foyer-procedure.pdf');
-        } else {
-            // Safe Failure / Escalation (URS-020)
-            addMessage('assistant', "I do not have a reliable answer grounded in the approved procedure set for this query. Please consult the Head Usher or User Procedures Coordinator.");
-        }
+    function resetContext() {
+      document.getElementById('locationSelect').value = '';
+      document.getElementById('serviceSelect').value = '';
+      document.getElementById('service2ndOpt').classList.remove('hidden');
+      document.getElementById('responseBox').innerText = 'Context reset to default (All Locations).';
+      document.getElementById('pdfLinkContainer').classList.add('hidden');
     }
 
-    function addMessage(sender, text, pdfUrl = null) {
-        const chatBox = document.getElementById('chatBox');
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `message ${sender}`;
-        msgDiv.innerText = text;
-
-        if (pdfUrl) {
-            const pdfAnchor = document.createElement('a');
-            pdfAnchor.className = 'pdf-link';
-            pdfAnchor.href = pdfUrl;
-            pdfAnchor.target = '_blank';
-            pdfAnchor.innerText = 'View Official Approved PDF';
-            msgDiv.appendChild(document.createElement('br'));
-            msgDiv.appendChild(pdfAnchor);
-        }
-
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        if (sender === 'assistant') {
-            speakText(text);
-        }
+    function selectRole(roleName) {
+      document.getElementById('queryInput').value = roleName + ' standard operating procedure';
+      executeQuery();
     }
 
-    // Voice Input & Synthesis Logic (URS-014, URS-015, FS-VOC-001, FS-VOC-003)
-    const voiceBtn = document.getElementById('voiceBtn');
-    const stopSpeechBtn = document.getElementById('stopSpeechBtn');
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') {
+        executeQuery();
+      }
+    }
 
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+    function executeQuery() {
+      const query = document.getElementById('queryInput').value.trim();
+      const responseBox = document.getElementById('responseBox');
+      const pdfContainer = document.getElementById('pdfLinkContainer');
 
-        voiceBtn.addEventListener('click', () => {
-            recognition.start();
-            voiceBtn.innerText = 'Listening...';
-        });
+      if (!query) return;
 
-        recognition.onresult = (event) => {
-            document.getElementById('userInput').value = event.results[0][0].transcript;
-            voiceBtn.innerText = '🎤 Voice';
-            processQuery();
-        };
+      // Guardrail Check: Intercept Roster Queries
+      const rosterTerms = ['roster', 'phone', 'email', 'contact', 'address', 'volunteer list', 'phone number'];
+      if (rosterTerms.some(term => query.toLowerCase().includes(term))) {
+        responseBox.innerText = "⚠️ Privacy Notice: Volunteer roster and personal contact details are restricted and not available through the public Usher Assistant.";
+        pdfContainer.classList.add('hidden');
+        speakText("Privacy notice: Volunteer roster details are restricted.");
+        return;
+      }
 
-        recognition.onerror = () => { voiceBtn.innerText = '🎤 Voice'; };
-        recognition.onend = () => { voiceBtn.innerText = '🎤 Voice'; };
-    } else {
-        voiceBtn.disabled = true;
+      // Simulated Intelligent Response Logic
+      const loc = document.getElementById('locationSelect').value || 'general';
+      responseBox.innerText = `[${loc.toUpperCase()}] Standard procedure for "${query}": Please ensure seating paths remain clear, assist devotees with minimal distraction, and coordinate directly with the Head Usher during service movement.`;
+      pdfContainer.classList.remove('hidden');
+
+      speakText(responseBox.innerText);
     }
 
     function speakText(text) {
-        if (!synth) return;
-        synth.cancel(); // Stop active speech
+      if (!synth) return;
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const stopBtn = document.getElementById('stopAudioBtn');
+      
+      utterance.onstart = () => stopBtn.classList.remove('hidden');
+      utterance.onend = () => stopBtn.classList.add('hidden');
+      utterance.onerror = () => stopBtn.classList.add('hidden');
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        stopSpeechBtn.classList.remove('hidden');
-
-        utterance.onend = () => stopSpeechBtn.classList.add('hidden');
-        utterance.onerror = () => stopSpeechBtn.classList.add('hidden');
-
-        synth.speak(utterance);
+      synth.speak(utterance);
     }
 
-    stopSpeechBtn.addEventListener('click', () => {
-        if (synth) {
-            synth.cancel();
-            stopSpeechBtn.classList.add('hidden');
-        }
-    });
-</script>
+    function stopSpeech() {
+      if (synth) {
+        synth.cancel();
+        document.getElementById('stopAudioBtn').classList.add('hidden');
+      }
+    }
+
+    function toggleVoiceInput() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser.");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.onstart = () => {
+        document.getElementById('voiceBtn').innerText = "🎙 Listening...";
+      };
+      recognition.onresult = (e) => {
+        document.getElementById('queryInput').value = e.results[0][0].transcript;
+        document.getElementById('voiceBtn').innerText = "🎤 Speak";
+        executeQuery();
+      };
+      recognition.onerror = () => {
+        document.getElementById('voiceBtn').innerText = "🎤 Speak";
+      };
+      recognition.start();
+    }
+  </script>
 </body>
 </html>
